@@ -34,7 +34,8 @@ Route::middleware('auth')->group(function(){
     Route::get('/dp4',[dp4Controller::class ,'index'])->name('dp4');
     Route::get('/dp4/kecamatan',[dp4Controller::class ,'getKecamatan']);
     Route::post('/dp4/get_kel',[dp4Controller::class ,'get_kel']);
-    Route::post('/dp4/get_tps',[dp4Controller::class ,'get_tps']);
+    Route::post('/dp4/get_tps',[dp4Controller::class ,'get_tps']);    
+    Route::post('/dp4/ganti_tps',[dp4Controller::class ,'ganti_tps']);
     Route::post('/dp4/import',[dp4Controller::class ,'import']);
     Route::get('dp4/set_filter_table',[dp4Controller::class ,'set_filter_dp4']);
     Route::get('/dp4/json',[dp4Controller::class,'json']);

@@ -4,13 +4,31 @@
 @section('css_link')
   <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
   <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
-  <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+  <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.css') }}">
+  <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.css') }}">
+  
+  
 @endsection
 @section('js_link_tambahan')
   <script src="{{ asset('adminlte/plugins/datatables/jquery.dataTables.min.js') }}"></script>
   <script src="{{ asset('adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+  <script src="{{ asset('adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+  <script src="{{ asset('adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+  <script src="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+
+
+  
 @endsection
 @section('content')
+<style>
+table.dataTable tbody tr.selected > * {
+  box-shadow: inset 0 0 0 9999px rgba(13, 110, 253, 0.9);
+  color: white;
+}
+table.dataTable tbody tr.selected a {
+  color: #090a0b;
+}
+</style>
 <div class="card">
      <div class="card-header">
       
@@ -25,10 +43,11 @@
             <select class="custom-select" name="combo_tps" id="combo_tps"></select>&nbsp;
             
             <a name="" id="btn_filter" class="btn btn-primary" href="#" role="button" >Filter</a>&nbsp;
-            <a name="" id="btn_settps2019" class="btn btn-primary" href="#" role="button" >Set TPS 2019</a>&nbsp;
-            <a name="" id="btn_import" class="btn btn-primary" href="#" role="button" data-toggle="modal" data-target="#modal_import">Import Data</a>&nbsp;
+            {{-- <a name="" id="btn_settps2019" class="btn btn-primary" href="#" role="button" >Set TPS 2019</a>&nbsp;
+            <a name="" id="btn_import" class="btn btn-primary" href="#" role="button" data-toggle="modal" data-target="#modal_import">Import Data</a>&nbsp; --}}
             
         </div>
+        {{ Session::get('kd_kec') }} / {{ Session::get('kd_kel') }} / {{ Session::get('tps') }}
         @if(isset($status))
             <div class="alert alert-primary" role="alert">
             {{ $status }}
@@ -149,12 +168,75 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="modal_ganti_tps" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Ubah TPS <span id="kode_kecx"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+         <table class="table table-strip">
+          <tbody>
+            <tr>
+              <th>NKK</th>
+              <td><span id="fnkk"></span></td>
+            </tr>
+            <tr>
+              <th>NIK</th>
+              <td><span id="fnik"></span></td>
+            </tr>
+            <tr>
+              <th>NAMA</th>
+              <td><span id="fnama"></span></td>
+            </tr>
+            <tr>
+              <th>ALAMAT</th>
+              <td><span id="falamat"></span></td>
+            </tr>
+            <tr>
+              <th>RT/RW</th>
+              <td><span id="frtrw"></span></td>
+            </tr>
+             <tr>
+              <th>TPS LAMA</th>
+              <td><span id="ftps"></span></td>
+            </tr>
+            
+          </tbody>
+         </table>
+         <hr>
+         <form method="post" action="dp4/ganti_tps" id="fganti_tps"> 
+         @csrf
+            <div class="form-group">
+                <label for="file">UBAH TPS KE</label>
+                <div class="form-group">
+                  <label for="tps_new_ganti"></label>
+                  <select class="form-control" name="tps_new_ganti" id="tps_new_ganti">
+                  </select>
+                </div>
+                <input type="hidden" name="id_pemilih" id="id_pemilih">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="btn_ganti_tps">Proses</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @endsection
 @section('script_js_tambahan')
 <script>
    $(document).ready(function () {
     $('.loading').hide();
-
+    
     {{-- Jika Sesi Telah Ada  --}}
      @if(isset($sesi["kd_kec"]))
         $("#combo_kec").val("{{ $sesi['kd_kec'] }}");
@@ -178,30 +260,33 @@
                         url: 'dp4/get_tps',
                         success: function(datax_tps) {
                           $("#combo_tps").empty();
+                          $("#tps_new_ganti").empty();
+                           
                           $("#combo_tps").append('<option value=ALL>ALL</option>');
                           $.each(datax_tps,function(key, value) 
                           {
                               $("#combo_tps").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
+                             $("#tps_new_ganti").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
                           });
                           $("#combo_tps").val('{{ $sesi['tps'] }}');
                         }
                     });
               }
             });
-        $("#table").DataTable({
-      processing:true,
-      serverSide:true,
-       ajax :{
-        @if(!empty($kd_kec))
-            @if($tps=="ALL")
-               data:{'kd_kec':'{{ $kd_kec }}','kd_kel':'{{ $kd_kel }}'},
-            @else
-               data:{'kd_kec':'{{ $kd_kec }}','kd_kel':'{{ $kd_kel }}','tps':'{{ $tps }}'},
-            @endif   
-         @endif
-         url : 'dp4/json'
-         
-      },
+        var mytable = $("#table").DataTable({
+            processing:true,
+            serverSide:true,
+            ajax :{
+              @if(!empty($kd_kec))
+                  @if($tps=="ALL")
+                    data:{'kd_kec':'{{ $kd_kec }}','kd_kel':'{{ $kd_kel }}'},
+                  @else
+                    data:{'kd_kec':'{{ $kd_kec }}','kd_kel':'{{ $kd_kel }}','tps':'{{ $tps }}'},
+                  @endif   
+              @endif
+              url : 'dp4/json'
+              
+            },
       columns : [
         {data : 'id',name:'id'},
         {data : 'nkk',name:'nkk'},
@@ -250,16 +335,19 @@
                         url: 'dp4/get_tps',
                         success: function(datax_tps) {
                           $("#combo_tps").empty();
+                           $("#tps_new_ganti").empty();
+                          
                           $("#combo_tps").append('<option value=ALL>ALL</option>');
                           $.each(datax_tps,function(key, value) 
                           {
                               $("#combo_tps").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
-                          });
+                              $("#tps_new_ganti").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
+                         });
                         }
                     });
               }
             });
-            $("#table").DataTable({
+            var mytable = $("#table").DataTable({
                 processing:true,
                 serverSide:true,
                 ajax :{
@@ -284,7 +372,7 @@
                 ]
           });
       @endif
-    
+   
      $("#combo_kec").change(function(){
             $("#kd_kec").val($(this).val());
             $("#kode_kecx").html($(this).val());
@@ -316,19 +404,61 @@
               url: 'dp4/get_tps',
               success: function(datax) {
                     $("#combo_tps").empty();
+                    $("#tps_new_ganti").empty();
+                    
                     $("#combo_tps").append('<option value=ALL>ALL</option>');
                     $.each(datax,function(key, value) 
                     {
                         $("#combo_tps").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
+                        $("#tps_new_ganti").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
                     });
                      $("#combo_tps").val("ALL");
               }
             });
      });
+     $('#btn_ganti_tps').click(function(){
+        Swal.fire({
+            title: 'Anda Yakin?',
+            text: "Sebelum Memindahkan Pemilih Ke TPS Tujuan, Mohon Dicatat Historinya !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ganti TPS ?'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              $('#fganti_tps').submit();
+              
+            }
+          })
+     });
      $("#btn_proses").click(function(){
          $('#fdp4_upload').submit();
      });
+      $('#table tbody').on( 'dblclick', 'tr', function () {
+           var aData = mytable.row( this ).data();
+           //console.log(aData['id']);
+           $('#fnik').text(aData['nik']);
+           $('#fnama').text(aData['nama']);
+           $('#fnkk').text(aData['nkk']);
+           $('#falamat').text(aData['alamat']);
+           $('#frtrw').text(aData['rt']+'/'+aData['rt']);
+           $('#ftps').text(aData['tps_new'])
+           $('#id_pemilih').val(aData['id']);
+           $('#modal_ganti_tps').modal('show');
+
+      });
+      $('#table tbody').on('click', 'tr', function () {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+        } else {
+            mytable.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+        }
+        
+    });
    });
+
    $('#btn_filter').click(function(){
          var kd_kec = $('#combo_kec').val();
          var kd_kel = $('#combo_kel').val();
@@ -336,11 +466,14 @@
          $.ajax({
                         dataType: 'json',
                         data: {'kd_kec' : kd_kec,'kd_kel' : kd_kel,'tps' : tps},
-                        url: 'dp4/set_filter_table'
+                        url: 'dp4/set_filter_table',
+                        success: function(datax) {
+                             location.reload();
+                        }
           });
 
          //$('#table').DataTable().ajax.reload();
-         location.reload();
+        
         
          
      })
@@ -364,7 +497,8 @@
 
         
          
-     })
+     });
+      
 </script>
 @endsection
 

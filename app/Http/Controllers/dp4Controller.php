@@ -8,43 +8,56 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\Dp4Import;
 use App\Models\dp4;
 use App\Models\DataPenetapan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Yajra\DataTables\DataTables;
 class dp4Controller extends Controller
 {
     public function index(Request $request)
     {
+
+     $level = Auth::user()->level;
+     if(in_array($level,array('admin','operator'))){
         if($request->session()->has('kd_kec')){
            $kd_kec =  $request->session()->get('kd_kec');
            $kd_kel =  $request->session()->get('kd_kel');
            $tps =  $request->session()->get('tps');
 
            //summary penetapan 2019 
-            $sum_tps_2019 = DB::table('data_penetapan')
-            ->select('tps', DB::raw('count(tps) as total'))
-            ->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])
-            ->orderBy('tps')->groupBy('tps')->get();
-            //summary dp4
-            $sum_tps_2024 = DB::table('dp4')
-            ->select('tps_new', DB::raw('count(tps_new) as total'))
-            ->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])
-            ->orderBy('tps_new')->groupBy('tps_new')->get();
+           
         }else{
-            $sum_tps_2019=NULL;
-            $sum_tps_2024=NULL;
+            $first_kecamatan = DB::table('kecamatan')->select('kd_kec')->first();
+            $kd_kec =  $first_kecamatan->kd_kec;
+            $first_kel = DB::table('kel_des')->select('kd_kel_des')->where('kd_kec','=',$kd_kec)->first();
+            $kd_kel =  $first_kel->kd_kel_des;
+            $tps="ALL";
+            $request->session()->put('kd_kec',$kd_kec);
+            $request->session()->put('kd_kel',$kd_kel);
+            
         }
 
         $kecamatan_data = DB::table('kecamatan')->get();
+       }else{
         
+       }
+        $sum_tps_2019 = DB::table('data_penetapan')
+        ->select('tps', DB::raw('count(tps) as total'))
+        ->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])
+        ->orderBy('tps')->groupBy('tps')->get();
+        //summary dp4
+        $sum_tps_2024 = DB::table('dp4')
+        ->select('tps_new', DB::raw('count(tps_new) as total'))
+        ->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])
+        ->orderBy('tps_new')->groupBy('tps_new')->get();
          
         //init session
-        $sesi_arr=['kd_kec'=>$request->session()->get('kd_kec'),
-                        'kd_kel'=>$request->session()->get('kd_kel'),
-                        'tps' =>$request->session()->get('tps')];
+        $sesi_arr=['kd_kec'=>$kd_kec,
+                        'kd_kel'=>$kd_kel,
+                        'tps' =>$tps];
         
                         
 
-         
+       // dd($request); 
         return view('dp4',['kecamatan_data'=>$kecamatan_data
                              ,'sum_tps_2019'=>$sum_tps_2019
                              ,'sum_tps_2024'=>$sum_tps_2024
@@ -147,7 +160,12 @@ class dp4Controller extends Controller
         return redirect('dp4')->with('status', $kd_kec.' Telah Selesai');
         
     }
-
+    public function ganti_tps(Request $request)
+    {
+        //dd($request); 
+        dp4::where("id","=",$request->input('id_pemilih'))->update(['tps_new'=>$request->input('tps_new_ganti')]);
+        return redirect('dp4')->with('status', 'Telah Selesai');
+    }
     public function get_tps2019(Request $request)
     {
         dp4::Select('id','nik','nkk','nama','tempat_lahir','tgl_lahir','kd_kec','kd_kel','tps')->where([['kd_kec','=',$request->input('kd_kec')],['kd_kel','=',$request->input('kd_kel')]])->orderBy('id')->chunk(100, function ($posts) {

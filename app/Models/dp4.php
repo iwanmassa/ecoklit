@@ -10,6 +10,7 @@ class dp4 extends Model
     use HasFactory;
     protected $table = 'dp4';
     protected $fillable = [
+        'id',
         'nkk',
         'nik',
         'nama',
