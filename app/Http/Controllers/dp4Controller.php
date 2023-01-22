@@ -24,7 +24,6 @@ class dp4Controller extends Controller
            $tps =  $request->session()->get('tps');
 
            //summary penetapan 2019 
-           
         }else{
             $first_kecamatan = DB::table('kecamatan')->select('kd_kec')->first();
             $kd_kec =  $first_kecamatan->kd_kec;
@@ -38,7 +37,19 @@ class dp4Controller extends Controller
 
         $kecamatan_data = DB::table('kecamatan')->get();
        }else{
-        
+        $kd_kec =  Auth::user()->kd_wilayah;
+        if($request->session()->has('kd_kec')){
+            $kd_kel =  $request->session()->get('kd_kel');
+            $tps =  $request->session()->get('tps');
+             //summary penetapan 2019 
+         }else{
+            $first_kel = DB::table('kel_des')->select('kd_kel_des')->where('kd_kec','=',$kd_kec)->first();
+            $kd_kel =  $first_kel->kd_kel_des;
+            $tps="ALL";
+            $request->session()->put('kd_kec',$kd_kec);
+            $request->session()->put('kd_kel',$kd_kel);
+         }
+         $kecamatan_data = NULL;
        }
         $sum_tps_2019 = DB::table('data_penetapan')
         ->select('tps', DB::raw('count(tps) as total'))
@@ -119,7 +130,7 @@ class dp4Controller extends Controller
          
         if(isset($kd_kec)){
             if(isset($tps) && $tps!="ALL"){
-                $ret_data =  DataTables::of(Dp4::where([["kd_kec","=",$kd_kec],["kd_kel","=",$kd_kel],["tps_new","=",$tps]])->limit(10))->make(true);
+                $ret_data =  DataTables::of(Dp4::where([["kd_kec","=",$kd_kec],["kd_kel","=",$kd_kel],["tps_new","=",$tps]])->orderBy('nkk','asc'))->make(true);
             }else{
                 $ret_data = DataTables::of(Dp4::where([["kd_kec","=",$kd_kec],["kd_kel","=",$kd_kel]])->limit(10))->make(true);
             }
@@ -162,8 +173,15 @@ class dp4Controller extends Controller
     }
     public function ganti_tps(Request $request)
     {
-        //dd($request); 
-        dp4::where("id","=",$request->input('id_pemilih'))->update(['tps_new'=>$request->input('tps_new_ganti')]);
+        //dd($request);
+        
+        if($request->has('nkk_set')){ 
+          $kd_kec = $request->session()->get('kd_kec');
+          $kd_kel = $request->session()->get('kd_kel'); 
+          dp4::where([["nkk","=",$request->input('nkk_set')],["kd_kec",'=',$kd_kec],["kd_kel",'=',$kd_kel]])->update(['tps_new'=>$request->input('tps_new_ganti')]);
+        }else{
+          dp4::where("id","=",$request->input('id_pemilih'))->update(['tps_new'=>$request->input('tps_new_ganti')]); 
+        }  
         return redirect('dp4')->with('status', 'Telah Selesai');
     }
     public function get_tps2019(Request $request)

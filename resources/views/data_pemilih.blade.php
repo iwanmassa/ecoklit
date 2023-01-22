@@ -39,6 +39,7 @@
 @section('script_js_tambahan')
 <script>
    $(function () {
+    $('.loading').hide();
     $("#table").DataTable({
       processing:true,
       serverSide:true,

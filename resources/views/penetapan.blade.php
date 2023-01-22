@@ -91,8 +91,9 @@
 @section('script_js_tambahan')
 <script>
    $(function () {
-     $('.loading').hide();
+     
      @if(!empty($kd_kec))
+     $('.loading').hide();
         $("#combo_kec").val("{{ $kd_kec }}");
         $("#kode_kecx").html($("#combo_kec option:selected" ).text());
         $("#kd_kec").val({{ $kd_kec }}); 
@@ -115,6 +116,7 @@
         
      
      @else
+     $('.loading').hide();
      if($("#kd_kec").val()==""){      
      $("#combo_kec").val({{ $kecamatan_data->first()->kd_kec }}); 
      $("#kd_kec").val({{ $kecamatan_data->first()->kd_kec }}); 

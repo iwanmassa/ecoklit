@@ -33,12 +33,13 @@ table.dataTable tbody tr.selected a {
      <div class="card-header">
       
         <div class="form-inline form-group">
-            <label for=""></label>
+            @if(Auth::user()->level!='ppk' && Auth::user()->level!='pps' )
             <select class="custom-select" name="combo_kec" id="combo_kec">
                 @foreach ($kecamatan_data as $item)
                     <option value="{{ $item->kd_kec }}">{{$item->nama }}</option>
                 @endforeach
             </select>&nbsp;
+            @endif
             <select class="custom-select" name="combo_kel" id="combo_kel"></select>&nbsp;
             <select class="custom-select" name="combo_tps" id="combo_tps"></select>&nbsp;
             
@@ -47,7 +48,7 @@ table.dataTable tbody tr.selected a {
             <a name="" id="btn_import" class="btn btn-primary" href="#" role="button" data-toggle="modal" data-target="#modal_import">Import Data</a>&nbsp; --}}
             
         </div>
-        {{ Session::get('kd_kec') }} / {{ Session::get('kd_kel') }} / {{ Session::get('tps') }}
+        {{-- {{ Session::get('kd_kec') }} / {{ Session::get('kd_kel') }} / {{ Session::get('tps') }} --}}
         @if(isset($status))
             <div class="alert alert-primary" role="alert">
             {{ $status }}
@@ -218,6 +219,12 @@ table.dataTable tbody tr.selected a {
                   <select class="form-control" name="tps_new_ganti" id="tps_new_ganti">
                   </select>
                 </div>
+                <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="nkk_set" name="nkk_set">
+                <label class="form-check-label" for="defaultCheck1">
+                  Samakan TPS Berdasarkan NKK Pemilih ini
+                </label>
+              </div>
                 <input type="hidden" name="id_pemilih" id="id_pemilih">
             </div>
         </form>
@@ -445,7 +452,10 @@ table.dataTable tbody tr.selected a {
            $('#frtrw').text(aData['rt']+'/'+aData['rt']);
            $('#ftps').text(aData['tps_new'])
            $('#id_pemilih').val(aData['id']);
+           $('#nkk_set').val(aData['nkk']);
+           
            $('#modal_ganti_tps').modal('show');
+
 
       });
       $('#table tbody').on('click', 'tr', function () {
@@ -460,7 +470,11 @@ table.dataTable tbody tr.selected a {
    });
 
    $('#btn_filter').click(function(){
+         @if(Auth::user()->level!='ppk' && Auth::user()->level!='pps')
          var kd_kec = $('#combo_kec').val();
+         @else 
+         var kd_kec = "{{ Auth::user()->kd_wilayah }}";
+         @endif
          var kd_kel = $('#combo_kel').val();
          var tps = $('#combo_tps').val();
          $.ajax({
@@ -469,10 +483,11 @@ table.dataTable tbody tr.selected a {
                         url: 'dp4/set_filter_table',
                         success: function(datax) {
                              location.reload();
+                             //$('#table').DataTable().ajax.reload();
                         }
           });
 
-         //$('#table').DataTable().ajax.reload();
+         
         
         
          
