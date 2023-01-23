@@ -95,12 +95,14 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
+             
               <li class="nav-item">
                 <a href="dp4" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>DP4</p>
                 </a>
               </li>
+              @if(Auth::user()->level=='admin')
                 <li class="nav-item">
                 <a href="datapemilih" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
@@ -113,9 +115,16 @@
                   <p>Penetapan</p>
                 </a>
               </li>
+               <li class="nav-item">
+                <a href="tpsmanager" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>TPS MAnager</p>
+                </a>
+              </li>
+              @endif
             </ul>
           </li>
-
+@if(Auth::user()->level=='admin')
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-edit"></i>
@@ -163,11 +172,12 @@
               </li>
             </ul>
           </li>
+          @endif
           <li class="nav-item">
             <a href="logout" class="nav-link">
               <i class="nav-icon fas fa-sign-out-alt"></i>
               <p>
-                Logout
+                Logout <span style="font-size:10px">({{ Auth::user()->name }})</span>
               </p>
             </a>
           </li>

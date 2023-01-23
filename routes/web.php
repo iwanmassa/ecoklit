@@ -6,6 +6,7 @@ use App\Http\Controllers\DataPemilihController;
 use App\Http\Controllers\dp4Controller;
 use App\Http\Controllers\DataPenetapanController;
 use App\Http\Controllers\ProsesJoinTpsController;
+use App\Http\Controllers\TpsManager;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,7 +36,9 @@ Route::middleware('auth')->group(function(){
     Route::get('/dp4/kecamatan',[dp4Controller::class ,'getKecamatan']);
     Route::post('/dp4/get_kel',[dp4Controller::class ,'get_kel']);
     Route::post('/dp4/get_tps',[dp4Controller::class ,'get_tps']);    
+    Route::post('/dp4/get_tps_tambahan',[dp4Controller::class ,'get_tps_tambahan']);    
     Route::post('/dp4/ganti_tps',[dp4Controller::class ,'ganti_tps']);
+    Route::post('/dp4/tambah_tps',[dp4Controller::class ,'ganti_tps']);
     Route::post('/dp4/import',[dp4Controller::class ,'import']);
     Route::get('dp4/set_filter_table',[dp4Controller::class ,'set_filter_dp4']);
     Route::get('/dp4/json',[dp4Controller::class,'json']);
@@ -46,5 +49,6 @@ Route::middleware('auth')->group(function(){
     Route::get('/penetapan/get_kecamatan',[DataPenetapanController::class,'get_kecamatan']);
     Route::post('/penetapan/get_kel',[DataPenetapanController::class,'get_kel']);
     Route::get('/jointps',[ProsesJoinTpsController::class,'show']);
+    Route::get('/tpsmanager',[TpsManager::class,'index']);
 });
 

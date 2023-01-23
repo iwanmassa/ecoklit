@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\Dp4Import;
 use App\Models\dp4;
 use App\Models\DataPenetapan;
+use App\Models\tps_tambahan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Yajra\DataTables\DataTables;
@@ -61,10 +62,13 @@ class dp4Controller extends Controller
         ->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])
         ->orderBy('tps_new')->groupBy('tps_new')->get();
          
+        $tps_nol_count = DB::table('dp4')->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel],['tps_new','=','0']])->count();
+
         //init session
         $sesi_arr=['kd_kec'=>$kd_kec,
                         'kd_kel'=>$kd_kel,
-                        'tps' =>$tps];
+                        'tps' =>$tps,
+                        'tps_nol'=>$tps_nol_count];
         
                         
 
@@ -117,7 +121,22 @@ class dp4Controller extends Controller
             $kd_kec = $request->get('kd_kec');
             $kd_kel = $request->get('kd_kel');
         }
-        $tps_data = dp4::select('tps_new')->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])->orderBy('tps_new')->groupBy('tps_new')->get();  
+
+        $tps_data = tps_tambahan::select('no_tps')->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])->orderBy('no_tps')->get();  
+        //$tps_data = dp4::select('tps_new')->where([['kd_kec','=','720304'],['kd_kel','=','7203042001']])->orderBy('tps_new')->groupBy('tps_new')->get();  
+        return $tps_data;
+    }
+    public function get_tps_tambahan(Request $request)
+    {
+        //kalau sdh ada sesi
+        if($request->session()->has('kec')){
+        $kd_kec = $request->session()->get('kd_kec');
+        $kd_kel = $request->session()->get('kd_kel'); 
+        }else{
+            $kd_kec = $request->get('kd_kec');
+            $kd_kel = $request->get('kd_kel');
+        }
+        $tps_data = tps_tambahan::select('no_tps')->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])->orderBy('no_tps')->get();  
         //$tps_data = dp4::select('tps_new')->where([['kd_kec','=','720304'],['kd_kel','=','7203042001']])->orderBy('tps_new')->groupBy('tps_new')->get();  
         return $tps_data;
     }
@@ -228,6 +247,11 @@ class dp4Controller extends Controller
         
         return json_encode(array('sukses'=>true,"pesan"=>"sukses"));
 
+    }
+
+    public function tambah_tps(Request $request)
+    {
+        
     }
 
 }

@@ -44,7 +44,8 @@ table.dataTable tbody tr.selected a {
             <select class="custom-select" name="combo_tps" id="combo_tps"></select>&nbsp;
             
             <a name="" id="btn_filter" class="btn btn-primary" href="#" role="button" >Filter</a>&nbsp;
-            {{-- <a name="" id="btn_settps2019" class="btn btn-primary" href="#" role="button" >Set TPS 2019</a>&nbsp;
+            {{--<a name="" id="btn_add_tps" class="btn btn-primary" href="#" role="button" >Tambah TPS</a>&nbsp;
+             <a name="" id="btn_settps2019" class="btn btn-primary" href="#" role="button" >Set TPS 2019</a>&nbsp;
             <a name="" id="btn_import" class="btn btn-primary" href="#" role="button" data-toggle="modal" data-target="#modal_import">Import Data</a>&nbsp; --}}
             
         </div>
@@ -56,6 +57,7 @@ table.dataTable tbody tr.selected a {
         @endif
      </div>
      <div class="card-body">
+       {{ $sesi['tps_nol'] }}
         <table id="table" class="table table-bordered table-hover" style='font-size:12px'>
                       <thead>
                       <tr>
@@ -270,14 +272,18 @@ table.dataTable tbody tr.selected a {
                           $("#tps_new_ganti").empty();
                            
                           $("#combo_tps").append('<option value=ALL>ALL</option>');
+                           @if($sesi['tps_nol']> 0 )
+                          $("#combo_tps").append('<option value="0">0</option>');
+                          @endif
                           $.each(datax_tps,function(key, value) 
                           {
-                              $("#combo_tps").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
-                             $("#tps_new_ganti").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
+                              $("#combo_tps").append('<option value=' + value.no_tps + '>' + value.no_tps + '</option>');
+                             $("#tps_new_ganti").append('<option value=' + value.no_tps + '>' + value.no_tps + '</option>');
                           });
                           $("#combo_tps").val('{{ $sesi['tps'] }}');
                         }
                     });
+             
               }
             });
         var mytable = $("#table").DataTable({
@@ -345,13 +351,17 @@ table.dataTable tbody tr.selected a {
                            $("#tps_new_ganti").empty();
                           
                           $("#combo_tps").append('<option value=ALL>ALL</option>');
+                          @if($sesi['tps_nol']> 0 )
+                          $("#combo_tps").append('<option value="0">0</option>');
+                          @endif
                           $.each(datax_tps,function(key, value) 
                           {
-                              $("#combo_tps").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
-                              $("#tps_new_ganti").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
+                              $("#combo_tps").append('<option value=' + value.no_tps + '>' + value.no_tps + '</option>');
+                              $("#tps_new_ganti").append('<option value=' + value.no_tps + '>' + value.no_tps + '</option>');
                          });
                         }
                     });
+                    
               }
             });
             var mytable = $("#table").DataTable({
@@ -414,15 +424,20 @@ table.dataTable tbody tr.selected a {
                     $("#tps_new_ganti").empty();
                     
                     $("#combo_tps").append('<option value=ALL>ALL</option>');
+                     @if($sesi['tps_nol']> 0 )
+                          $("#combo_tps").append('<option value="0">0</option>');
+                      @endif
                     $.each(datax,function(key, value) 
                     {
-                        $("#combo_tps").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
-                        $("#tps_new_ganti").append('<option value=' + value.tps_new + '>' + value.tps_new + '</option>');
+                        $("#combo_tps").append('<option value=' + value.no_tps + '>' + value.no_tps + '</option>');
+                        $("#tps_new_ganti").append('<option value=' + value.no_tps + '>' + value.no_tps + '</option>');
                     });
                      $("#combo_tps").val("ALL");
               }
             });
+         
      });
+
      $('#btn_ganti_tps').click(function(){
         Swal.fire({
             title: 'Anda Yakin?',
@@ -439,6 +454,11 @@ table.dataTable tbody tr.selected a {
             }
           })
      });
+     
+     $('#btn_add_tps').click(function(){
+        alert('ok');
+     });
+
      $("#btn_proses").click(function(){
          $('#fdp4_upload').submit();
      });
@@ -491,7 +511,7 @@ table.dataTable tbody tr.selected a {
         
         
          
-     })
+     });
      $('#btn_settps2019').click(function(){
          var kd_kec = $('#combo_kec').val();
          var kd_kel = $('#combo_kel').val();
