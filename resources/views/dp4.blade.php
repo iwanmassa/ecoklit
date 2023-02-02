@@ -44,6 +44,9 @@ table.dataTable tbody tr.selected a {
             <select class="custom-select" name="combo_tps" id="combo_tps"></select>&nbsp;
             
             <a name="" id="btn_filter" class="btn btn-primary" href="#" role="button" >Filter</a>&nbsp;
+            @if(Auth::user()->level=='admin')
+            <a name=""  class="btn btn-primary" href="dp4/export_portal" role="button" >Export</a>&nbsp;
+            @endif
             {{--<a name="" id="btn_add_tps" class="btn btn-primary" href="#" role="button" >Tambah TPS</a>&nbsp;
              <a name="" id="btn_settps2019" class="btn btn-primary" href="#" role="button" >Set TPS 2019</a>&nbsp;
             <a name="" id="btn_import" class="btn btn-primary" href="#" role="button" data-toggle="modal" data-target="#modal_import">Import Data</a>&nbsp; --}}
@@ -132,7 +135,7 @@ table.dataTable tbody tr.selected a {
                       @if(!empty($sum_tps_2024))
                       @foreach ($sum_tps_2024 as $item)
 
-                        <tr>    <td>{{ $item->tps_new }}</td><td>{{$item->total }}</td> </tr>
+                        <tr>    <td>{{ $item->tps_new }}</td><td>{{$item->total }} (L:{{$item->j_laki_laki}}) (P:{{$item->j_perempuan}})</td> </tr>
                       @endforeach
                       @endif
                       </tbody>
@@ -512,6 +515,10 @@ table.dataTable tbody tr.selected a {
         
          
      });
+
+     $('#btn_export').click(function(){
+        alert('ok')
+      });
      $('#btn_settps2019').click(function(){
          var kd_kec = $('#combo_kec').val();
          var kd_kel = $('#combo_kel').val();

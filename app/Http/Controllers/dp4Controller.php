@@ -8,10 +8,14 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\Dp4Import;
 use App\Models\dp4;
 use App\Models\DataPenetapan;
+use App\Models\kecamatan;
+use App\Models\kel_des;
 use App\Models\tps_tambahan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Yajra\DataTables\DataTables;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class dp4Controller extends Controller
 {
     public function index(Request $request)
@@ -58,10 +62,15 @@ class dp4Controller extends Controller
         ->orderBy('tps')->groupBy('tps')->get();
         //summary dp4
         $sum_tps_2024 = DB::table('dp4')
-        ->select('tps_new', DB::raw('count(tps_new) as total'))
+        ->select('tps_new', DB::raw('count(tps_new) as total'),DB::raw("count(if(jenis_kelamin='P',1,NULL)) as j_perempuan"),DB::raw("count(if(jenis_kelamin='L',1,NULL)) as j_laki_laki"))
         ->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])
         ->orderBy('tps_new')->groupBy('tps_new')->get();
-         
+        
+        $sum_kk_dp4 = DB::table('dp4')
+        ->select(DB::raw('count(nkk) as jum_nkk'))
+        ->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])
+        ->orderBy('nkk')->groupBy('nkk')->get();
+
         $tps_nol_count = DB::table('dp4')->where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel],['tps_new','=','0']])->count();
 
         //init session
@@ -76,6 +85,7 @@ class dp4Controller extends Controller
         return view('dp4',['kecamatan_data'=>$kecamatan_data
                              ,'sum_tps_2019'=>$sum_tps_2019
                              ,'sum_tps_2024'=>$sum_tps_2024
+                             ,'sum_nkk'=>$sum_kk_dp4
                              ,'sesi'=>$sesi_arr                             
                             ]);
         
@@ -253,5 +263,97 @@ class dp4Controller extends Controller
     {
         
     }
+
+    public function export_xls(Request $request)
+    {
+        $kd_kec = $request->session()->get('kd_kec');
+        $kd_kel = $request->session()->get('kd_kel');
+        $tps = $request->session()->get('tps');
+        $kec_data = kecamatan::select('nama')->where('kd_kec','=',$kd_kec)->first();
+        $kel_data = kel_des::select('nama')->where('kd_kel_des','=',$kd_kel)->first();
+      
+       $objPHPExcel = \PhpOffice\PhpSpreadsheet\IOFactory::load("xls_portal/temp/export_dp.xlsx");
+       //echo getcwd();;
+       $xx1 = 0;
+       $sheet = 0;
+       $objPHPExcel->createSheet($sheet);
+       $objPHPExcel->setActiveSheetIndex($sheet)
+				->setTitle("$kel_data->nama"."($sheet)")
+				->setCellValue("A1", "NKK")
+				->setCellValue("B1", "NIK")
+				->setCellValue("C1", "Nama")
+				->setCellValue("D1", "Tempat Lahir")
+				->setCellValue("E1", "Tgl Lahir")
+				->setCellValue("F1", "Status Kawin")
+				->setCellValue("G1", "Jenis Kelamin")
+				->setCellValue("H1", "Alamat")
+				->setCellValue("I1", "RT")
+				->setCellValue("J1", "RW")
+				->setCellValue("K1", "Disabilitas")
+				->setCellValue("L1", "Ektp")
+				->setCellValue("M1", "Keterangan")
+				->setCellValue("N1", "Sumber Data")
+				->setCellValue("O1", "TPS");
+
+        $yy1 = 2;
+
+        $data = dp4::where([['kd_kec','=',$kd_kec],['kd_kel','=',$kd_kel]])->orderBy('tps_new')->get();
+        
+        //$data = dp4::where([['kd_kec','=','720304'],['kd_kel','=','7203042001']])->orderBy('tps_new')->get();
+        
+        foreach($data as $rows){
+            $objPHPExcel->setActiveSheetIndex($sheet)
+						->setCellValueExplicit("A$yy1", "$rows->nkk", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("B$yy1", "$rows->nik", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("C$yy1", "$rows->nama", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("D$yy1", "$rows->tempat_lahir", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("E$yy1", "$rows->tgl_lahir", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("F$yy1", $rows->status, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("G$yy1", "$rows->jenis_kelamin", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("H$yy1", "$rows->alamat", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("I$yy1", "$rows->rt", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("J$yy1", "$rows->rw", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("K$yy1", "$rows->disabilitas", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("L$yy1", "S", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("M$yy1", "0", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("N$yy1", "dpt", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING)
+						->setCellValueExplicit("O$yy1", "$rows->tps_new", \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);	
+            $yy1++;
+            if($yy1 > 1001){
+                $sheet++;
+                $objPHPExcel->createSheet($sheet);	
+                $objPHPExcel->setActiveSheetIndex($sheet)
+						->setTitle("$kel_data->nama"."($sheet)")
+						->setCellValue("A1", "NKK")
+						->setCellValue("B1", "NIK")
+						->setCellValue("C1", "Nama")
+						->setCellValue("D1", "Tempat Lahir")
+						->setCellValue("E1", "Tgl Lahir")
+						->setCellValue("F1", "Status Kawin")
+						->setCellValue("G1", "Jenis Kelamin")
+						->setCellValue("H1", "Alamat")
+						->setCellValue("I1", "RT")
+						->setCellValue("J1", "RW")
+						->setCellValue("K1", "Disabilitas")
+						->setCellValue("L1", "Ektp")
+						->setCellValue("M1", "Keterangan")
+						->setCellValue("N1", "Sumber Data")
+						->setCellValue("O1", "TPS");
+                $yy1 = 2;
+            }    	
+
+        }
+       // $path = storage_path('app/public/'."AKWK-$kd_kec-$kd_kel-TPS.xlsx");
+        // dd($path);
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="'."export-$kec_data->nama-$kel_data->nama.xlsx".'"');
+        header('Cache-Control: max-age=0');
+        ob_end_clean();
+
+        $objWriter = new Xlsx($objPHPExcel);
+        $objWriter->save('php://output');
+        
+    }
+    
 
 }

@@ -37,14 +37,14 @@
                                 <td><span id='tps{{ $item_tps['no_tps']}}' tambahan=false id_tps='{{ $item_tps['no_tps'] }}'>{{ $item_tps['no_tps']}}</span>
                                 </td>
                                 <td>@if($item_tps['sts']==0)
-                                <a heff="#" id_tps='{{ $item_tps['id'] }}' class="btn btn-primary">Aktifkan</a>
+                                <a heff="#" id_tps='{{ $item_tps['id'] }}' class="btn btn-sm  btn-primary">Aktifkan</a>
                                 @else
-                                <a heff="#" id_tps='{{ $item_tps['id'] }}' class="btn btn-danger">Disable</a>
+                                <a heff="#" id_tps='{{ $item_tps['id'] }}' class="btn btn-sm  btn-danger">Disable</a>
                                 @endif
                                 </td>
                                 <td>
                                 @if($item_tps['sts']==0)
-                                        <a heff="#" id_tps='{{ $item_tps['id'] }}' class="btn btn-danger">Hapus</a>
+                                        <a heff="#" id_tps='{{ $item_tps['id'] }}' class="btn btn-sm btn-danger">Hapus</a>
                                 @endif
                                 </td>
                             </tr>

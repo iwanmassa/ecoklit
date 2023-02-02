@@ -34,12 +34,15 @@ Route::middleware('auth')->group(function(){
     Route::get('/dp4/{kd_kec}/{kd_kel}/{tps}',[dp4Controller::class ,'index2']);
     Route::get('/dp4',[dp4Controller::class ,'index'])->name('dp4');
     Route::get('/dp4/kecamatan',[dp4Controller::class ,'getKecamatan']);
+    Route::get('/dp4/export_portal',[dp4Controller::class ,'export_xls']);
+    
     Route::post('/dp4/get_kel',[dp4Controller::class ,'get_kel']);
     Route::post('/dp4/get_tps',[dp4Controller::class ,'get_tps']);    
     Route::post('/dp4/get_tps_tambahan',[dp4Controller::class ,'get_tps_tambahan']);    
     Route::post('/dp4/ganti_tps',[dp4Controller::class ,'ganti_tps']);
     Route::post('/dp4/tambah_tps',[dp4Controller::class ,'ganti_tps']);
     Route::post('/dp4/import',[dp4Controller::class ,'import']);
+
     Route::get('dp4/set_filter_table',[dp4Controller::class ,'set_filter_dp4']);
     Route::get('/dp4/json',[dp4Controller::class,'json']);
     Route::post('/dp4/gettps2019',[dp4Controller::class,'get_tps2019']);

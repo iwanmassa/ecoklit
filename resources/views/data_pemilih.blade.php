@@ -1,6 +1,6 @@
 @extends('master')
-@section('title','Data Pemilih')
-@section('content_name','Data Pemilih')
+@section('title','Daftar Pemilih')
+@section('content_name','Daftar Pemilih')
 @section('css_link')
   <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
   <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
